@@ -45,6 +45,13 @@ module.exports = class extends BaseGenerator {
         }
       },
 
+      checkClientFramework() {
+        if (this.jhAppConfig.clientFramework !== 'angularX') {
+          this.env.warning(`${chalk.yellow.bold('WARNING!')} I currently only support Angular 2+ as client framework...
+            Client components will ${chalk.bold('NOT')} be generated.\n`);
+        }
+      },
+
       getEntitityNames() {
         const existingEntities = [];
         const existingEntityChoices = [];
@@ -146,6 +153,7 @@ module.exports = class extends BaseGenerator {
       });
     }
   }
+
   get writing() {
     return {
       updateYeomanConfig() {
@@ -311,33 +319,7 @@ module.exports = class extends BaseGenerator {
         if (!this.auditPage) return;
 
         let files = [];
-        if (this.clientFramework === 'angular1') {
-          files = [{
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audits.html`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audits.html`
-          },
-          {
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audit.detail.html`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audit.detail.html`
-          },
-          {
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audit.state.js`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audit.state.js`
-          },
-          {
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audit.controller.js`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audit.controller.js`
-          },
-          {
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audit.detail.controller.js`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audit.detail.controller.js`
-          },
-          {
-            from: `${this.webappDir}angularjs/app/admin/entity-audit/_entity-audit.service.js`,
-            to: `${this.webappDir}app/admin/entity-audit/entity-audit.service.js`
-          }
-          ];
-        } else {
+        if (this.clientFramework === 'angularX') {
           files = [
             {
               from: `${this.webappDir}angular/app/admin/entity-audit/_entity-audit-event.model.ts`,
@@ -372,6 +354,8 @@ module.exports = class extends BaseGenerator {
               to: `${this.webappDir}app/admin/entity-audit/entity-audit.service.ts`
             },
           ];
+        } else {
+          // TODO: add additional clientFrameworks
         }
 
         if (this.auditFramework === 'custom') {
@@ -386,6 +370,7 @@ module.exports = class extends BaseGenerator {
           });
         }
 
+        // front end localization files
         if (this.enableTranslation) {
           this.languages.forEach((language) => {
             let sourceLanguage = 'en';
@@ -401,13 +386,10 @@ module.exports = class extends BaseGenerator {
 
         genUtils.copyFiles(this, files);
 
-        // add bower dependency required
-        if (this.clientFramework === 'angular1') {
-          this.addBowerDependency('angular-object-diff', '1.0.3');
-          this.addAngularJsModule('ds.objectDiff');
-        } else {
+        // add clientFramework specific NPM dependencies
+        if (this.clientFramework === 'angularX') {
           // add dependency required for displaying diffs
-          this.addNpmDependency('ng-diff-match-patch', '2.0.6');
+          this.addNpmDependency('ng-diff-match-patch', '3.0.1');
           // based on BaseGenerator.addAdminToModule
           const adminModulePath = `${this.webappDir}app/admin/admin.module.ts`;
           this.rewriteFile(
@@ -420,10 +402,12 @@ module.exports = class extends BaseGenerator {
             'jhipster-needle-add-admin-module',
             'EntityAuditModule,'
           );
+        } else {
+          // TODO: dependencies for other frameworks?
         }
 
         // add new menu entry
-        this.addElementToAdminMenu('entity-audit', 'list-alt', this.enableTranslation, this.clientFramework);
+        this.addElementToAdminMenu('entity-audit', 'bell', this.enableTranslation, this.clientFramework);
         if (this.enableTranslation) {
           this.languages.forEach((language) => {
             let menuText = 'Entity Audit';
@@ -449,27 +433,20 @@ module.exports = class extends BaseGenerator {
 
 
   install() {
-    let logMsg =
-      `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
+    const logMsg = `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
 
-    if (this.clientFramework === 'angular1') {
-      logMsg =
-        `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install & bower install`)}`;
-    }
     const injectDependenciesAndConstants = (err) => {
       if (err) {
         this.warning('Install of dependencies failed!');
         this.log(logMsg);
-      } else if (this.clientFramework === 'angular1') {
-        this.spawnCommand('gulp', ['install']);
       } else if (this.clientFramework === 'angularX') {
         this.spawnCommand(this.clientPackageManager, ['webpack:build']);
       }
     };
     const installConfig = {
-      bower: this.clientFramework === 'angular1',
       npm: this.clientPackageManager !== 'yarn',
       yarn: this.clientPackageManager === 'yarn',
+      bower: false,
       callback: injectDependenciesAndConstants
     };
     if (this.options['skip-install']) {
@@ -481,6 +458,6 @@ module.exports = class extends BaseGenerator {
 
   end() {
     this.log(`\n${chalk.bold.green('Auditing enabled for entities, you will have an option to enable audit while creating new entities as well')}`);
-    this.log(`\n${chalk.bold.green('I\'m running webpack/gulp now')}`);
+    this.log(`\n${chalk.bold.green('I\'m running webpack now')}`);
   }
 };

@@ -9,17 +9,17 @@ import { EntityAuditEvent } from './entity-audit-event.model';
     templateUrl: './entity-audit-modal.component.html',
     styles: [`
         /* NOTE: for now the /deep/ shadow-piercing descendant combinator is
-         * required because Angular defaults to emulated view encapsulation and
-         * preprocesses all component styles to approximate shadow scoping
-         * rules. This means these styles wouldn't apply to the HTML generated
-         * by ng-diff-match-patch.
-         *
-         * This shouldn't be required when browsers support native
-         * encapsulation, at which point /deep/ will also be deprecated/removed
-         * see https://angular.io/guide/component-styles
-         */
+        * required because Angular defaults to emulated view encapsulation and
+        * preprocesses all component styles to approximate shadow scoping
+        * rules. This means these styles wouldn't apply to the HTML generated
+        * by ng-diff-match-patch.
+        *
+        * This shouldn't be required when browsers support native
+        * encapsulation, at which point /deep/ will also be deprecated/removed
+        * see https://angular.io/guide/component-styles
+        */
 
-        :host /deep/ ins {
+       :host /deep/ ins {
             color: black;
             background: #bbffbb;
         }
@@ -48,7 +48,7 @@ export class EntityAuditModalComponent {
     openChange(audit: EntityAuditEvent) {
         this.service.getPrevVersion(
             audit.entityType, audit.entityId, audit.commitVersion
-        ).subscribe((res) => {
+        ).subscribe(res => {
             const data: EntityAuditEvent = res.body;
             const previousVersion = JSON.stringify(JSON.parse(data.entityValue), null, 2);
             const currentVersion = JSON.stringify(audit.entityValue, null, 2);
