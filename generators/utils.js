@@ -3,10 +3,9 @@ const glob = require('glob');
 
 const TPL = 'template';
 
-const changeset = (changelogDate, entityTableName) =>
-  `
+const changeset = (changelogDate, entityTableName) => `
     <!-- Added the entity audit columns -->
-    <changeSet id="${changelogDate}-audit-1" author="jhipster-entity-audit">
+    <changeSet id="${changelogDate}-1-audit" author="jhipster-entity-audit">
         <addColumn tableName="${entityTableName}">
             <column name="created_by" type="varchar(50)">
                 <constraints nullable="false"/>
@@ -18,6 +17,11 @@ const changeset = (changelogDate, entityTableName) =>
             <column name="last_modified_date" type="timestamp"/>
         </addColumn>
     </changeSet>`;
+
+const changesetLoadColumn = `
+    <!-- Added the entity audit load columns -->
+    <column name="created_by" type="string" />
+    <column name="created_date" type="timestamp" />`;
 
 const copyFiles = (gen, files) => {
   files.forEach((file) => {
@@ -48,6 +52,8 @@ const updateEntityAudit = function (entityName, entityData, javaDir, resourceDir
     const file = glob.sync(`${resourceDir}/config/liquibase/changelog/*_added_entity_${entityName}.xml`)[0];
     const entityTableName = entityData.entityTableName ? entityData.entityTableName : entityName;
     this.addChangesetToLiquibaseEntityChangelog(file, changeset(this.changelogDate, this.getTableName(entityTableName)));
+
+    this.addLoadColumnToLiquibaseEntityChangeSet(file, changesetLoadColumn);
   } else if (this.auditFramework === 'javers') {
     // check if repositories are already annotated
     const auditTableAnnotation = '@JaversSpringDataAuditable';
