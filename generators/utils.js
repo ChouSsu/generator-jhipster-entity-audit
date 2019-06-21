@@ -20,8 +20,7 @@ const changeset = (changelogDate, entityTableName) => `
 
 const changesetLoadColumn = `
     <!-- Added the entity audit load columns -->
-    <column name="created_by" type="string" />
-    <column name="created_date" type="timestamp" />`;
+    <column name="created_by" type="string" default="jhipster" />`;
 
 const copyFiles = (gen, files) => {
   files.forEach((file) => {

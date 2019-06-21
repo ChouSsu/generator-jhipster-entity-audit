@@ -188,6 +188,7 @@ module.exports = class extends BaseGenerator {
         this.interpolateRegex = jhipsterConstants.INTERPOLATE_REGEX;
       },
 
+      // Server files
       writeBaseFiles() {
         let files;
         if (this.auditFramework === 'custom') {
@@ -262,7 +263,9 @@ module.exports = class extends BaseGenerator {
           ];
 
           genUtils.copyFiles(this, files);
+
           // add required third party dependencies
+          // TODO: Check versions
           if (this.buildTool === 'maven') {
             if (this.databaseType === 'mongodb') {
               this.addMavenDependency('org.javers', 'javers-spring-boot-starter-mongo', '3.5.0', '<scope>compile</scope>');
@@ -307,6 +310,7 @@ module.exports = class extends BaseGenerator {
         }
       },
 
+      // Client files
       writeAuditPageFiles() {
         // Create audit log page for entities
         if (!this.auditPage) return;
