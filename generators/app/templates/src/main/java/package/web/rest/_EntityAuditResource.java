@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URISyntaxException;
 import java.util.List;
-import javax.transaction.Transactional;
 
 /**
  * REST controller for getting the audit events for entity
