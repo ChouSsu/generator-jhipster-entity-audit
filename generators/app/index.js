@@ -146,6 +146,7 @@ module.exports = class extends BaseGenerator {
       });
     }
   }
+
   get writing() {
     return {
       updateYeomanConfig() {
@@ -454,12 +455,10 @@ module.exports = class extends BaseGenerator {
 
 
   install() {
-    let logMsg =
-      `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
+    let logMsg = `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
 
     if (this.clientFramework === 'angular1') {
-      logMsg =
-        `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install & bower install`)}`;
+      logMsg = `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install & bower install`)}`;
     }
     const injectDependenciesAndConstants = (err) => {
       if (err) {

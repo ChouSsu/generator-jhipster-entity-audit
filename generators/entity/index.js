@@ -84,6 +84,7 @@ module.exports = class extends BaseGenerator {
       done();
     });
   }
+
   get writing() {
     return {
 
