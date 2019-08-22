@@ -40,13 +40,13 @@ const fakeDataColumns = [
 const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeDataColumns) => {
   if (newFakeDataColumns) {
     // read existing file
-    let fileContent = fs.readFileSync(fakeDataFile, 'utf8');
+    const fileContent = fs.readFileSync(fakeDataFile, 'utf8');
     // var newColumns = JSON.parse(fakeDataColumns);
-    let newColumns = fakeDataColumns;
+    const newColumns = fakeDataColumns;
 
     // process fileContent: add additional columns with fake data
     const rows = fileContent.split('\n');
-    for (let rowIdx in rows) {
+    for (const rowIdx in rows) {
       if (!rows[rowIdx] || rows[rowIdx].length === 0) {
         break;
       } else {
@@ -61,7 +61,7 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
           });
         } else {
           // data row
-          for (let idx in newColumns) {
+          for (const idx in newColumns) {
             if (newColumns[idx]) {
               if (newColumns[idx].fieldType === 'integer'
                 || newColumns[idx].fieldType === 'bigint'
@@ -71,13 +71,13 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
                   max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
                   min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined
                 });
-              } else if (newColumns[idx].fieldType === '${floatType}') {
+              } else if (newColumns[idx].fieldType === '\${floatType}') {
                 data = faker.random.number({
                   max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
                   min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined,
                   precision: 0.01
                 });
-              } else if (newColumns[idx].fieldType === '${uuidType}') {
+              } else if (newColumns[idx].fieldType === '\${uuidType}') {
                 data = faker.random.uuid();
               } else if (newColumns[idx].fieldType === 'boolean') {
                 data = faker.random.boolean();
@@ -90,7 +90,7 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
               }
               // Validation rules
               if (newColumns[idx].validateRules.pattern) {
-                data = new this.randexp(newColumns[idx].validateRules.pattern).gen();
+                data = this.randexp(newColumns[idx].validateRules.pattern).gen();
               }
               if (newColumns[idx].validateRules.maxLength) {
                 data = data.substring(0, newColumns[idx].validateRules.maxLength);
@@ -100,8 +100,8 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
               }
 
               // test if generated data is still compatible with the regexp as we potentially modify it with min/maxLength
-              if (newColumns[idx].validateRules.pattern &&
-                !new RegExp('^' + newColumns[idx].validateRules.pattern + '$').test(data)) {
+              if (newColumns[idx].validateRules.pattern
+                  && !new RegExp('^${newColumns[idx].validateRules.pattern}$').test(data)) {
                 data = '';
               }
 
@@ -115,13 +115,13 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
             }
           }
         }
-        const item = rowContent.map(modified => { return modified; }).join(';');
+        const item = rowContent.map(modified => modified).join(';');
         rows[rowIdx] = item;
       }
     }
 
     // write modified data back to file
-    const result = rows.map(modified => { return modified }).join('\n');
+    const result = rows.map(modified => modified).join('\n');
     fs.writeFileSync(fakeDataFile, result, 'utf8');
   }
 };
