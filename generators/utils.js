@@ -28,11 +28,11 @@ const changesetLoadColumn = `
 
 const fakeDataColumns = [
   {
-    "databaseColumn": "created_by",
-    "fieldType": "varchar",
-    "validateRules": {
-      "required": true,
-      "maxLength": 50
+    databaseColumn: 'created_by',
+    fieldType: 'varchar',
+    validateRules: {
+      required: true,
+      maxLength: 50
     }
   }
 ];
@@ -40,85 +40,88 @@ const fakeDataColumns = [
 const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeDataColumns) => {
   if (newFakeDataColumns) {
     // read existing file
-    var fileContent = fs.readFileSync(fakeDataFile, 'utf8');
+    let fileContent = fs.readFileSync(fakeDataFile, 'utf8');
     // var newColumns = JSON.parse(fakeDataColumns);
-    var newColumns = fakeDataColumns;
+    let newColumns = fakeDataColumns;
 
     // process fileContent: add additional columns with fake data
-    let rows = fileContent.split('\n');
-    for (rowIdx in rows) {
+    const rows = fileContent.split('\n');
+    for (let rowIdx in rows) {
       if (!rows[rowIdx] || rows[rowIdx].length === 0) {
         break;
-      }
-      let rowContent = rows[rowIdx].split(';');
-
-      let data = '';
-      if (parseInt(rowIdx) === 0) {
-        // header row
-        newColumns.forEach((newCol) =>{
-          data = newCol.databaseColumn;
-          rowContent.push(data);
-        });
       } else {
-        // data row
-        for (idx in newColumns) {
-          if (newColumns[idx].fieldType === 'integer' 
-              || newColumns[idx].fieldType === 'bigint'
-              || newColumns[idx].fieldType === 'double'
-              || newColumns[idx].fieldType.startsWith('decimal')) {
-            data = faker.random.number({
-              max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
-              min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined
-            });
-          } else if (newColumns[idx].fieldType === '${floatType}') {
-            data = faker.random.number({
-              max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
-              min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined,
-              precision: 0.01
-            });
-          } else if (newColumns[idx].fieldType === '${uuidType}') {
-            data = faker.random.uuid();
-          } else if (newColumns[idx].fieldType === 'boolean') {
-            data = faker.random.boolean();
-          } else if (newColumns[idx].fieldType === 'date') {
-            data = faker.date.recent().toISOString().split('T')[0];
-          } else if (newColumns[idx].fieldType === 'datetime') {
-            data = faker.date.recent().toISOString().split('.')[0];
-          } else if (newColumns[idx].fieldType.startsWith('varchar')) {
-            data = faker.random.word();
-          }
-          // Validation rules
-          if (newColumns[idx].validateRules.pattern) {
-            data = new this.randexp(newColumns[idx].validateRules.pattern).gen();
-          }
-          if (newColumns[idx].validateRules.maxLength) {
-            data = data.substring(0, newColumns[idx].validateRules.maxLength);
-          }
-          if (newColumns[idx].validateRules.minLength) {
-            data = data.length > newColumns[idx].validateRules.minLength ? data : data + "X".repeat(newColumns[idx].validateRules.minLength - data.length);
-          }
+        let rowContent = rows[rowIdx].split(';');
 
-          // test if generated data is still compatible with the regexp as we potentially modify it with min/maxLength
-          if (newColumns[idx].validateRules.pattern &&
-              !new RegExp("^" + newColumns[idx].validateRules.pattern + "$").test(data)) {
-            data = "";
-          }
+        let data = '';
+        if (parseInt(rowIdx, 10) === 0) {
+          // header row
+          newColumns.forEach((newCol) => {
+            data = newCol.databaseColumn;
+            rowContent.push(data);
+          });
+        } else {
+          // data row
+          for (let idx in newColumns) {
+            if (newColumns[idx]) {
+              if (newColumns[idx].fieldType === 'integer'
+                || newColumns[idx].fieldType === 'bigint'
+                || newColumns[idx].fieldType === 'double'
+                || newColumns[idx].fieldType.startsWith('decimal')) {
+                data = faker.random.number({
+                  max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
+                  min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined
+                });
+              } else if (newColumns[idx].fieldType === '${floatType}') {
+                data = faker.random.number({
+                  max: newColumns[idx].validateRules.maxValue ? newColumns[idx].validateRules.maxValue : undefined,
+                  min: newColumns[idx].validateRules.minValue ? newColumns[idx].validateRules.minValue : undefined,
+                  precision: 0.01
+                });
+              } else if (newColumns[idx].fieldType === '${uuidType}') {
+                data = faker.random.uuid();
+              } else if (newColumns[idx].fieldType === 'boolean') {
+                data = faker.random.boolean();
+              } else if (newColumns[idx].fieldType === 'date') {
+                data = faker.date.recent().toISOString().split('T')[0];
+              } else if (newColumns[idx].fieldType === 'datetime') {
+                data = faker.date.recent().toISOString().split('.')[0];
+              } else if (newColumns[idx].fieldType.startsWith('varchar')) {
+                data = faker.random.word();
+              }
+              // Validation rules
+              if (newColumns[idx].validateRules.pattern) {
+                data = new this.randexp(newColumns[idx].validateRules.pattern).gen();
+              }
+              if (newColumns[idx].validateRules.maxLength) {
+                data = data.substring(0, newColumns[idx].validateRules.maxLength);
+              }
+              if (newColumns[idx].validateRules.minLength) {
+                data = data.length > newColumns[idx].validateRules.minLength ? data : data + 'X'.repeat(newColumns[idx].validateRules.minLength - data.length);
+              }
 
-          // manage required
-          if (newColumns[idx].validateRules.required && data === '') {
-            rowContent = [];
-            break;
-          }
+              // test if generated data is still compatible with the regexp as we potentially modify it with min/maxLength
+              if (newColumns[idx].validateRules.pattern &&
+                !new RegExp('^' + newColumns[idx].validateRules.pattern + '$').test(data)) {
+                data = '';
+              }
 
-          rowContent.push(data);
-        };
+              // manage required
+              if (newColumns[idx].validateRules.required && data === '') {
+                rowContent = [];
+                break;
+              }
+
+              rowContent.push(data);
+            }
+          }
+        }
+        const item = rowContent.map(modified => { return modified; }).join(';');
+        rows[rowIdx] = item;
       }
-      item = rowContent.map(modified => {return modified;}).join(';');
-      rows[rowIdx] = item;
-    };
+    }
 
     // write modified data back to file
-    let result = rows.map(modified => {return modified}).join('\n');
+    const result = rows.map(modified => { return modified }).join('\n');
     fs.writeFileSync(fakeDataFile, result, 'utf8');
   }
 };
