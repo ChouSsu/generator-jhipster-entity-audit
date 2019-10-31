@@ -46,7 +46,7 @@ const addFakeDataColumnsToLiquibaseFakeDataLoadfile = (fakeDataFile, newFakeData
 
     // process fileContent: add additional columns with fake data
     const rows = fileContent.split('\n');
-    for (const rowIdx in rows) {
+    for (const rowIdx in rows.entries) {
       if (!rows[rowIdx] || rows[rowIdx].length === 0) {
         break;
       } else {
